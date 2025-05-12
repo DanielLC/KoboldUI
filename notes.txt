@@ -1,0 +1,40 @@
+How to run:
+
+venv\Scripts\activate
+python controller.py
+
+In the middle of:
+
+Saving seems to work. Further testing would be nice.
+
+Bugs:
+
+Closing a tab automatically opens a new project. Why?
+	Closing the last tab automatically while it's selected selects the + tab, which means a new one is instantly added. Which would be really convenient for closing the last tab.
+Sometimes it hangs and I get this error: QBasicTimer::start: QBasicTimer can only be used with threads started with QThread
+	This hasn't happened in a while, but I have no way to know if it's over.
+
+TODO:
+
+Make it so while searching, the character details area is inactive.
+Make it so pressing escape during a search clears the text field and ends the search.
+start_kobold() has code for running the AI model. I should probably change that if I want to distribute this.
+Make it so searching for multiple words searches for something containing all the words, but not that exact string.
+Make it so you can search descriptions too.
+I'll need to make it so you can delete characters. You can remove them from the project by searching for them, but I don't feel like that's the best way to do it.
+	In fact, it might be better to change it so searching shows anyone in the current project (highlighted if they're active), then a spacer and any results outside the project. That way you can search just to find a character in the current project, rather than adding a new one.
+Make it automatically find the number of tokens in the memory and each character, and show how many tokens are used. Maybe even show how much of the context window is visible.
+Make it stop adding letters one at a time when the story that's generating isn't the current tab. You can use self.aborting. Probably make the check also check if it's generating in the selected tab.
+Add some generating throbber on the tab that's being generated.
+Add in saving and loading.
+Add in a way to have stories saved that aren't in tabs, and can be opened somehow.
+Add in a way to load saves from whatever UI kobold.cpp comes with. And ideally, save to it.
+
+Scary:
+
+Make it show "Untitled" in italics if that tab is untitled.
+	There's no way to tell it to format a specific tab differently. I can add a widget to one side of the text, but it won't center. From what I can find, I'd have to make my own class to extend tab bar or something crazy like that.
+I can make a separate QTextDocument for each text area in each tab and swap out the QTextDocuments. That will preserve their undo and redo history. And I can simplify writing generated text to the story area. It just writes to the document, instead of having to follow if it's the current on opened.
+	I tried this. I don't think it's worth finishing. I'd have to also have a seperate document for each tab to do it right.
+There's a tabsClosable variable that mostly does that whole thing I implemented with buttons to close. But it leaves them there the whole time and I can't figure out how to turn them off and I already implemented my way.
+	And there's a movable variable. That could be interesting to add. I just have to make sure everything responds to it right.
