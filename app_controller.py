@@ -234,7 +234,7 @@ class Controller:
             self.ui.set_character(clicked_character)
             #If you're not searching, it's just the active characters.
             pool = self.project.active_characters
-            active = name_lower not in pool;
+            active = clicked_character not in pool
             if active:
                 pool.add(clicked_character)
             else:

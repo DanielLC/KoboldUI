@@ -3,14 +3,8 @@ How to run:
 venv\Scripts\activate
 python controller.py
 
-In the middle of:
-
-Saving seems to work. Further testing would be nice.
-
 Bugs:
 
-Closing a tab automatically opens a new project. Why?
-	Closing the last tab automatically while it's selected selects the + tab, which means a new one is instantly added. Which would be really convenient for closing the last tab.
 Sometimes it hangs and I get this error: QBasicTimer::start: QBasicTimer can only be used with threads started with QThread
 	This hasn't happened in a while, but I have no way to know if it's over.
 
