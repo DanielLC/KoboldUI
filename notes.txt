@@ -3,6 +3,10 @@ How to run:
 venv\Scripts\activate
 python controller.py
 
+In the middle of:
+
+Make it track saved tabs (where they have a name, but are not opened) properly load them
+
 Bugs:
 
 Sometimes it hangs and I get this error: QBasicTimer::start: QBasicTimer can only be used with threads started with QThread
@@ -10,6 +14,7 @@ Sometimes it hangs and I get this error: QBasicTimer::start: QBasicTimer can onl
 
 TODO:
 
+Make it so Ctrl+O is not the only way to open saved tabs
 Make it so while searching, the character details area is inactive.
 Make it so pressing escape during a search clears the text field and ends the search.
 start_kobold() has code for running the AI model. I should probably change that if I want to distribute this.

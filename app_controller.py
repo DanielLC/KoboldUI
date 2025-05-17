@@ -56,6 +56,12 @@ class Controller:
         self.ui.character_removed_from_project.connect(self.remove_character_from_project)
         self.ui.character_deleted.connect(self.delete_character)
         self.ui.closing_program.connect(self.save)   #TODO: There should be a way to close without saving.
+        self.ui.search_shortcut.activated.connect(self.project_search)
+        self.ui.search_panel_button_layout.button_clicked.connect(self.project_search_button_clicked)
+    
+    #TODO: I need to have a dictionary of named projects, and pass in the names.
+    def project_search(self):
+        self.ui.project_search(Project.projects)
 
     def handle_abort(self):
         self.aborting = True
@@ -314,6 +320,19 @@ class Controller:
             # Check if this line indicates kobold is ready
             if line.startswith(ready_line):
                 return
+    
+    #This will have to be completely redone once I add a separate thing for all projects.
+    def project_search_button_clicked(self, button):
+        name = button.text()
+        print("app_controlly.py setting project to", name)
+        for i, project in enumerate(Project.projects):
+            if project.name == name:
+                self.ui.stacked_widget.setCurrentIndex(0)
+                self.ui.tab_bar.setCurrentIndex(i)
+                print("Successful. New index:", i)
+                return
+        else:
+            print("Failed")
 
     def populate_gui(self, project):
         self.ui.set_memory(project.memory)

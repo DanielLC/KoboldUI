@@ -1,7 +1,8 @@
 import sys
+from auto_grid_layout import *
 from PySide6.QtWidgets import *
 from PySide6.QtCore import Qt, QSize, QMetaObject, Signal, QRect, QEvent
-from PySide6.QtGui import QIntValidator, QDoubleValidator, QUndoStack, QUndoCommand, QTextCursor, QAction, QCursor
+from PySide6.QtGui import QIntValidator, QDoubleValidator, QUndoStack, QUndoCommand, QTextCursor, QAction, QCursor, QKeySequence, QShortcut
 
 MARGIN = 10
 
@@ -24,11 +25,22 @@ class KoboldUI(QMainWindow):
         super().__init__()
         self.setWindowTitle("Kobold UI")
         
-        # Layout for the whole window
-        main_layout = QVBoxLayout()
-        central_widget = QWidget()
-        central_widget.setLayout(main_layout)
-        self.setCentralWidget(central_widget)
+        # Create stacked widget to switch between normal view and search view
+        self.stacked_widget = QStackedWidget()
+        self.setCentralWidget(self.stacked_widget)
+        
+        # Create normal view container
+        main_view = QWidget()
+        main_layout = QVBoxLayout(main_view)
+        
+        # Create search view container
+        self.search_view = QWidget()
+        self.search_layout = QVBoxLayout(self.search_view)
+        
+        # Add both to stacked widget
+        self.stacked_widget.addWidget(main_view)
+        self.stacked_widget.addWidget(self.search_view)
+        
 
         # Create tab bar
         # I'm using a QTabBar rather than a QTabWidget because I'm not actually changing the visible UI elements when a new tab is selected. It just tells the controller to change the contents of those elements.
@@ -41,7 +53,7 @@ class KoboldUI(QMainWindow):
         self.tab_bar.event = self._tab_bar_event
         self.tab_bar.setAttribute(Qt.WA_Hover)
         #self.tab_bar.setTabsClosable(True)
-        self.tab_bar.setStyleSheet("""
+        self.setStyleSheet("""
             QTabBar::tab {
                 padding: 6px 12px;
                 min-width: 150px;
@@ -56,6 +68,9 @@ class KoboldUI(QMainWindow):
             }
             QTabBar::close-button {
                 visibility: hidden;
+            }
+            QScrollArea {
+                border: none;
             }
         """)
         self.close_tab_button = QPushButton("×")
@@ -89,38 +104,29 @@ class KoboldUI(QMainWindow):
         self.setup_left_panel()
         self.setup_middle_panel()
         self.setup_right_panel()
+        self.setup_search_panel()
         
         self.command_entry.returnPressed.connect(self._on_command_entry_return)
         self.send_button.clicked.connect(self._on_send_button_clicked)
         
         self.is_generating = False
         
-        self.undo_stack = QUndoStack(self)
-        # undo_action = self.undo_stack.createUndoAction(self, "Undo")
-        # undo_action.setShortcut("Ctrl+Z")
-        # self.addAction(undo_action)
-
-        # redo_action = self.undo_stack.createRedoAction(self, "Redo")
-        # redo_action.setShortcut("Ctrl+Shift+Z")
-        # self.addAction(redo_action)
-
-        # self.last_text = {}  # Dictionary to track last text for each widget
-        # self.story_area.textChanged.connect(lambda: self.on_text_changed(self.story_area))
-        # self.memory_area.textChanged.connect(lambda: self.on_text_changed(self.memory_area))
-        # #self.command_entry.textChanged.connect(lambda: self.on_line_edit_changed(self.command_entry))
-        
-        # test_action = QAction("Test", self)
-        # test_action.setShortcut("Ctrl+W")
-        # test_action.triggered.connect(self.test_function)
-        # self.addAction(test_action)
-        
         self.edited_tab_index = -1
+        
+        # Create shortcuts
+        self.search_shortcut = QShortcut(QKeySequence("Ctrl+O"), self)
     
-    # def test_function(self):
-        # #This is an effective way to clear undo history.
-        # self.story_area.setUndoRedoEnabled(False)
-        # self.story_area.setUndoRedoEnabled(True)
-        # print("Action tested.")
+    def setup_search_panel(self):
+        self.search_area = QLineEdit()
+        self.search_layout.addWidget(self.search_area, 0)
+        self.search_panel_button_layout = AutoGridLayout()
+        self.search_layout.addWidget(self.search_panel_button_layout, 0)
+        self.search_layout.setAlignment(self.search_panel_button_layout, Qt.AlignTop)
+        self.search_layout.addStretch(1)
+
+    def project_search(self, projects):
+        self.search_panel_button_layout.setButtons([project.name for project in projects if project.name != ''])
+        self.stacked_widget.setCurrentIndex(1)
 
     def setup_left_panel(self):
         layout = QVBoxLayout(self.left_panel)
@@ -451,9 +457,6 @@ class KoboldUI(QMainWindow):
         self.is_generating = locked
         self.send_button.setText("Abort" if locked else "Send")
     
-    def run_app(self):
-        return self.app.exec()
-    
     def new_tab(self, name):
         print("New tab")
         last = self.tab_bar.count() - 1
@@ -533,6 +536,9 @@ class KoboldUI(QMainWindow):
         window.app = app
         window.showMaximized()
         return window
+    
+    def run_app(self):
+        return self.app.exec()
 
 if __name__ == "__main__":
     window = create_window()
