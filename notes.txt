@@ -5,7 +5,7 @@ python controller.py
 
 In the middle of:
 
-Make the search bar in the project search useable.
+pass
 
 Bugs:
 

@@ -58,10 +58,25 @@ class Controller:
         self.ui.closing_program.connect(self.save)   #TODO: There should be a way to close without saving.
         self.ui.search_shortcut.activated.connect(self.project_search)
         self.ui.search_panel_button_layout.button_clicked.connect(self.project_search_button_clicked)
+        self.ui.project_search_bar.textChanged.connect(self.project_filter)
     
     #TODO: I should probably change this to just pass in names. Either that or make the buttons actually track the projects.
+    #Also, this is very similar to character_search()
     def project_search(self):
-        self.ui.project_search(Project.named_projects.values())
+        self.ui.stacked_widget.setCurrentIndex(1)
+        self.project_filter()
+    
+    def project_filter(self):
+        if self.ui.stacked_widget.currentIndex() != 1:
+            return
+        text = self.ui.project_search_bar.text().strip()
+        pattern = f"*{text.lower()}*"
+        #TODO If I'm looking at the keys, I don't need to to be lowercase.
+        matching_projects = [
+            project for name, project in Project.named_projects.items()
+            if fnmatch(name, pattern)
+        ]
+        self.ui.project_search(matching_projects)
 
     def handle_abort(self):
         self.aborting = True
@@ -334,7 +349,8 @@ class Controller:
             i = len(Project.open_projects)
             Project.open_projects.append(project)
             self.ui.new_tab(project.name)
-        self.ui.stacked_widget.setCurrentIndex(0)   #TODO: I think the opposite order would work better, but it needs testing.
+        self.ui.stacked_widget.setCurrentIndex(0)
+        self.ui.project_search_bar.setText('')
         self.ui.tab_bar.setCurrentIndex(i)
 
     def populate_gui(self, project):

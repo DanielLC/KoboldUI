@@ -117,16 +117,16 @@ class KoboldUI(QMainWindow):
         self.search_shortcut = QShortcut(QKeySequence("Ctrl+O"), self)
     
     def setup_search_panel(self):
-        self.search_area = QLineEdit()
-        self.search_layout.addWidget(self.search_area, 0)
+        self.project_search_bar = QLineEdit()
+        self.search_layout.addWidget(self.project_search_bar, 0)
         self.search_panel_button_layout = AutoGridLayout()
         self.search_layout.addWidget(self.search_panel_button_layout, 0)
         self.search_layout.setAlignment(self.search_panel_button_layout, Qt.AlignTop)
         self.search_layout.addStretch(1)
 
+    #TODO: I should probably change it to just pass in names, and have the controller talk directly to the auto_grid_layout.
     def project_search(self, projects):
-        self.search_panel_button_layout.setButtons([project.name for project in projects if project.name != ''])
-        self.stacked_widget.setCurrentIndex(1)
+        self.search_panel_button_layout.setButtons([project.name for project in projects])
 
     def setup_left_panel(self):
         layout = QVBoxLayout(self.left_panel)
