@@ -11,7 +11,8 @@ class Character:
         return {'name':self.name, 'description':self.description}
 
 class Project:
-    projects = []
+    named_projects = {}
+    open_projects = []
     all_characters = {}
     max_tokens = 100
     temperature = 0.7
@@ -24,13 +25,6 @@ class Project:
         self.project_characters = set()
         self.active_characters = set()
         self.selected_character = None
-    
-    def new():
-        project = Project()
-        Project.projects.append(project)
-        print("Project added. There are now", len(Project.projects), "projects.")
-        #traceback.print_stack()
-        return project
     
     def from_dictionary(dictionary):
         project = Project()
@@ -56,15 +50,17 @@ class Project:
     def load_from_dictionary(dictionary):
         #all_characters must be read first since those characters are loaded into the other variables.
         Project.all_characters = {name:Character.from_dictionary(char_dict) for name, char_dict in dictionary['all_characters'].items()}
-        Project.projects = [Project.from_dictionary(project_dict) for project_dict in dictionary['projects']]
+        Project.named_projects = {name:Project.from_dictionary(project_dict) for name, project_dict in dictionary['named_projects'].items()}
+        Project.open_projects = [Project.named_projects[project_dict] if isinstance(project_dict, str) else Project.from_dictionary(project_dict) for project_dict in dictionary['open_projects']]
         Project.max_tokens = dictionary['max_tokens']
         Project.temperature = dictionary['temperature']
         Project.story_index = dictionary['story_index']
     
     def all_to_dictionary():
         myDict = {
-            'projects': [project.to_dictionary() for project in Project.projects],
-            'all_characters': {name:character.to_dictionary() for name, character in Project.all_characters.items()},
+            'named_projects': {name: project.to_dictionary() for name, project in Project.named_projects.items()},
+            'open_projects': [project.to_dictionary() if project.name == '' else project.name.lower() for project in Project.open_projects],
+            'all_characters': {name: character.to_dictionary() for name, character in Project.all_characters.items()},
             'max_tokens': Project.max_tokens,
             'temperature': Project.temperature,
             'story_index': Project.story_index,

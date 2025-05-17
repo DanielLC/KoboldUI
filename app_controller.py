@@ -59,9 +59,9 @@ class Controller:
         self.ui.search_shortcut.activated.connect(self.project_search)
         self.ui.search_panel_button_layout.button_clicked.connect(self.project_search_button_clicked)
     
-    #TODO: I need to have a dictionary of named projects, and pass in the names.
+    #TODO: I should probably change this to just pass in names. Either that or make the buttons actually track the projects.
     def project_search(self):
-        self.ui.project_search(Project.projects)
+        self.ui.project_search(Project.named_projects.values())
 
     def handle_abort(self):
         self.aborting = True
@@ -254,6 +254,9 @@ class Controller:
     
     def update_character_name(self):
         old_name = self.project.selected_character.name
+        #This if statement only runs if you try to edit the name when there's no character selected. I should probably make that not allowed.
+        if old_name == None:
+            return
         new_name = self.ui.char_name.text().strip()
         if not self.is_char_name_valid(new_name):
             self.ui.char_name.setText(old_name)
@@ -321,18 +324,18 @@ class Controller:
             if line.startswith(ready_line):
                 return
     
-    #This will have to be completely redone once I add a separate thing for all projects.
     def project_search_button_clicked(self, button):
         name = button.text()
+        project = Project.named_projects[name.lower()]
         print("app_controlly.py setting project to", name)
-        for i, project in enumerate(Project.projects):
-            if project.name == name:
-                self.ui.stacked_widget.setCurrentIndex(0)
-                self.ui.tab_bar.setCurrentIndex(i)
-                print("Successful. New index:", i)
-                return
+        if project in Project.open_projects:
+            i = Project.open_projects.index(project)
         else:
-            print("Failed")
+            i = len(Project.open_projects)
+            Project.open_projects.append(project)
+            self.ui.new_tab(project.name)
+        self.ui.stacked_widget.setCurrentIndex(0)   #TODO: I think the opposite order would work better, but it needs testing.
+        self.ui.tab_bar.setCurrentIndex(i)
 
     def populate_gui(self, project):
         self.ui.set_memory(project.memory)
@@ -353,14 +356,13 @@ class Controller:
         except FileNotFoundError:
             print("File not found.")
             Project.new()
-        print(Project.projects)
-        self.ui.set_all_tabs([project.name for project in Project.projects], Project.story_index)
+        self.ui.set_all_tabs([project.name for project in Project.open_projects], Project.story_index)
     
     def select_tab(self, i):
         if self.generating is self.project:
             self.ui.lock_story_area(False)
         Project.story_index = i
-        self.project = Project.projects[i]
+        self.project = Project.open_projects[i]
         self.populate_gui(self.project)
         if self.generating is self.project:
             self.ui.lock_story_area(True)
@@ -369,7 +371,7 @@ class Controller:
         self.project.memory = self.ui.get_memory()
     
     def new_tab(self):
-        Project.new()
+        Project.open_projects.append(Project())
         self.ui.new_tab('')
     
     #TODO: The name is too close to update_story_smooth. I'll need to change names to clarify update_story_smooth updating it in the UI vs update_story updating it from the UI to the model.
@@ -377,23 +379,27 @@ class Controller:
         self.project.story = self.ui.get_story()
     
     def _is_project_name_valid(self, name):
-        if name == '+' or name == "Untitled":
+        name = name.lower()
+        if name == '+' or name == "untitled":
             return False
-        for project in Project.projects:
-            if name == project.name:
+        for project_name in Project.named_projects:
+            if name == project_name:
                 return False
         return True
     
     def rename_tab(self, index, name):
         name = name.strip()
         if self._is_project_name_valid(name):
+            if self.project.name != '':
+                del Project.named_projects[name.lower()]
             self.project.name = name
+            Project.named_projects[name.lower()] = self.project
             self.ui.set_tab_name(index, name)
         else:
             self.ui.set_tab_name(index, self.project.name)
     
     def close_tab(self, index):
-        del Project.projects[index]
+        del Project.open_projects[index]
         self.ui.remove_tab(index)
 
 # Application entry point
