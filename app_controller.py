@@ -268,10 +268,10 @@ class Controller:
         self.ui.set_character(self.project.selected_character)
     
     def update_character_name(self):
-        old_name = self.project.selected_character.name
         #This if statement only runs if you try to edit the name when there's no character selected. I should probably make that not allowed.
-        if old_name == None:
+        if self.project.selected_character == None:
             return
+        old_name = self.project.selected_character.name
         new_name = self.ui.char_name.text().strip()
         if not self.is_char_name_valid(new_name):
             self.ui.char_name.setText(old_name)
@@ -404,15 +404,16 @@ class Controller:
         return True
     
     def rename_tab(self, index, name):
+        old_name = self.project.name
         name = name.strip()
         if self._is_project_name_valid(name):
-            if self.project.name != '':
-                del Project.named_projects[name.lower()]
+            if old_name != '':
+                del Project.named_projects[old_name.lower()]
             self.project.name = name
             Project.named_projects[name.lower()] = self.project
             self.ui.set_tab_name(index, name)
         else:
-            self.ui.set_tab_name(index, self.project.name)
+            self.ui.set_tab_name(index, old_name)
     
     def close_tab(self, index):
         del Project.open_projects[index]

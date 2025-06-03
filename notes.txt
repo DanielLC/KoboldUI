@@ -1,7 +1,6 @@
 How to run:
 
-venv\Scripts\activate
-python controller.py
+run.bat
 
 In the middle of:
 
