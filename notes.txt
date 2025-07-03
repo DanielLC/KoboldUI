@@ -8,6 +8,7 @@ pass
 
 Bugs:
 
+A tab with no name that should have been deleted was saved. And last time I saved it, I had two of the same tab saved somehow.
 Sometimes it hangs and I get this error: QBasicTimer::start: QBasicTimer can only be used with threads started with QThread
 	This hasn't happened in a while, but I have no way to know if it's over.
 

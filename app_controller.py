@@ -212,6 +212,7 @@ class Controller:
         Project.all_characters[name.lower()] = new_character
         self.project.project_characters.add(new_character)
         self.project.active_characters.add(new_character)
+        self.set_selected_character(new_character)
         self.ui.character_search.setText('')    #This automatically calls the function here for searching for the name, which means it brings you back to seeing all the characters.
     
     def remove_character_from_project(self, name):
@@ -290,6 +291,10 @@ class Controller:
         #self.project.selected_character.detail = character_detail
         self.project.selected_character.description = self.ui.get_character_description()
     
+    def set_selected_character(self, character):
+        self.project.selected_character = character
+        self.ui.set_character(character)
+    
     #This just runs characer_search() with whatever the text of the search is.
     def _update_character_buttons(self):
         self.character_search(self.ui.character_search.text())
@@ -356,7 +361,7 @@ class Controller:
     def populate_gui(self, project):
         self.ui.set_memory(project.memory)
         self.ui.set_story(project.story)
-        self.ui.set_character_list(project.project_characters)
+        self.ui.set_character_list(project.project_characters, project.active_characters)
         self.ui.set_character(project.selected_character)
         #print(project.name, project.project_characters)
     

@@ -5,6 +5,8 @@ from PySide6.QtCore import Qt, QSize, QMetaObject, Signal, QRect, QEvent
 from PySide6.QtGui import QIntValidator, QDoubleValidator, QUndoStack, QUndoCommand, QTextCursor, QAction, QCursor, QKeySequence, QShortcut
 
 MARGIN = 10
+FONT_SIZE = 18
+TAB_WIDTH = 200
 
 class KoboldUI(QMainWindow):
     text_to_add = Signal(str)
@@ -53,25 +55,28 @@ class KoboldUI(QMainWindow):
         self.tab_bar.event = self._tab_bar_event
         self.tab_bar.setAttribute(Qt.WA_Hover)
         #self.tab_bar.setTabsClosable(True)
-        self.setStyleSheet("""
-            QTabBar::tab {
+        self.setStyleSheet(f"""
+            * {{
+                font-size: {FONT_SIZE}px;
+            }}
+            QTabBar::tab {{
                 padding: 6px 12px;
-                min-width: 150px;
+                min-width: {TAB_WIDTH}px;
                 min-height: 22px;
-            }
-            QTabBar {
+            }}
+            QTabBar {{
                 qproperty-expanding: false;
-            }
-            QTabBar::tab:last {
+            }}
+            QTabBar::tab:last {{
                 min-width: 20px;
                 padding: 6px;
-            }
-            QTabBar::close-button {
+            }}
+            QTabBar::close-button {{
                 visibility: hidden;
-            }
-            QScrollArea {
+            }}
+            QScrollArea {{
                 border: none;
-            }
+            }}
         """)
         self.close_tab_button = QPushButton("×")
         self.close_tab_button.clicked.connect(self._remove_tab)
