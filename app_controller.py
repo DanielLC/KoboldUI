@@ -375,8 +375,8 @@ class Controller:
                 Project.load_from_dictionary(json.load(openfile))
             print("File found and loaded.")
         except FileNotFoundError:
-            print("File not found.")
-            Project.new()
+            print("Savefile not found. Creating a new save.")
+            Project.start_empty()
         self.ui.set_all_tabs([project.name for project in Project.open_projects], Project.story_index)
     
     def select_tab(self, i):

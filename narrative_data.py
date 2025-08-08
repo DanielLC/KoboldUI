@@ -18,6 +18,14 @@ class Project:
     temperature = 0.7
     story_index = 0
     
+    def start_empty():
+        Project.all_characters = {}
+        Project.named_projects = {}
+        Project.open_projects = [Project()]
+        Project.max_tokens = 500
+        Project.temperature = 0.7
+        Project.story_index = 0
+    
     def __init__(self):
         self.name = ''
         self.memory = ''
