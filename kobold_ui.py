@@ -453,7 +453,10 @@ class KoboldUI(QMainWindow):
             self.tab_bar.setTabButton(newIndex, QTabBar.RightSide, self.close_tab_button)
     
     def lock_story_area(self, locked = True):
-        print("Locking story area")
+        if locked:
+            print("Locking story area")
+        else:
+            print("Unlocking story area")
         self.story_area.setReadOnly(locked)
         QApplication.processEvents()    #TODO: Do I need this?
     

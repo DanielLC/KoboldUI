@@ -33,6 +33,7 @@ class Controller:
         self.typing_thread = threading.Thread(target=self._typing_loop, daemon=True)
         self.typing_thread.start()
         self.lock = threading.Lock()
+        self.completing = False         #Tracks if the input stream is finished and it's just typing the rest out.
         
         self.project = None
         self.load()
@@ -118,20 +119,25 @@ class Controller:
 
     def update_story_smooth(self, extra, completed):
         with self.lock:
-            self.generated_text += extra
-            self.completing = completed
-            self.wake_thread.set()
+            if completed and self.generated_text == "" and extra == "":
+                self.add_text(extra, completed)
+            else:
+                self.generated_text += extra
+                self.completing = completed
+                self.wake_thread.set()
     
     def add_text(self, text, completed):
-        self.generating.story += text
         is_cur_story = self.generating is self.project
-        if is_cur_story:
-            self.ui.add_text(text)
+        if text != "":
+            self.generating.story += text
+            if is_cur_story:
+                self.ui.add_text(text)
         if completed:
             self.ui.set_generating_state(False)
             if is_cur_story:
                 self.ui.lock_story_area(False)
-            self.generating = None
+            #print("Done generating")
+            self.generating = None     #Commenting this out makes it work, but does it break anything else? This is how it tracks if anything is generating, and it looks like it would break tab switching.
 
     def _typing_loop(self):
         index = 0
@@ -143,6 +149,7 @@ class Controller:
             with self.lock:
                 #I need to make sure this works for all the cases:
                 #1. (Done) It just recieved the first token.
+                    #1b. (Prevented) It recieved the first token, except it's an empty string.
                 #2. (Done) It recieved another token while in the middle of typing, and needs to update based on how long it waited so far.
                 #3. (Done) It recieved the last token, and needs to type quickly and then
                     #3b. (Done) Alert the main thread that typing is completed and the text box can be unlocked.
@@ -180,6 +187,10 @@ class Controller:
                         start_time = new_time
                     remaining_text = len(self.generated_text) - index
                     #This line feels really weird. I print the letter at index, and then check if it's the last one. Except remaining_text is still 1, since that's the letter I just wrote. Then I increment index and decrement remaining_text. It feels like I should move this, but then I'd have to do something weirder use self.generated_text[index-1].
+                    #It's crashing on this line when given an empty token and nothing else.
+                    if self.generated_text == "":
+                        print(f"generated_text is empty. remaining_text is {remaining_text}.")
+                    #print(f"{self.generated_text[index]} {remaining_text}")
                     self.add_text(self.generated_text[index], self.completing and remaining_text == 1)
                     index += 1
                     remaining_text -= 1

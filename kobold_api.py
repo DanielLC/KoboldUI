@@ -43,7 +43,7 @@ baseSettings = {
   "use_default_badwordsids": False,
 }
 
-#This prompts teh LLM, and prints the result. Note that it's polling it to see progress, so simply returning the result won't work. I'll need something more sophisticated.
+#This prompts the LLM, and prints the result. Note that it's polling it to see progress, so simply returning the result won't work. I'll need something more sophisticated.
 def prompt(outFunction, text = '', memory = '', grammar = '', stopSequence = []):
     global genkey
     settings = baseSettings.copy()
@@ -68,6 +68,7 @@ def prompt(outFunction, text = '', memory = '', grammar = '', stopSequence = [])
 #I think the thread is just being stuck here endlessly.
 #Note to self: If this is what's happening, the abort button shouldn't continue the text. Does abort ever work correctly?
 def stream_prompt(outFunction, text='', memory='', max_length=100, temperature=1, grammar='', stopSequence = []):
+    print("Streaming prompt.")
     global genkey
     settings = baseSettings.copy()
     genkey = ''.join([random.choice('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ') for _ in range(10)])
@@ -75,11 +76,12 @@ def stream_prompt(outFunction, text='', memory='', max_length=100, temperature=1
     prevTime = -1
     with requests.post(STREAM_URL, json=settings, stream=True) as resp:
         for line in resp.iter_lines(decode_unicode=True, chunk_size=1):
-            #print(f"stream_prompt: {line}")
+            print(f"stream_prompt: {line}")
             if line.startswith('data: '):
                 data = json.loads(line[6:])
                 token = data.get('token')
-                done = data.get('finish_reason') != 'null'
+                #Before, this was checking for "null". Did the new version of kobold.cpp change it?
+                done = data.get('finish_reason') != None
                 outFunction(token, done)
                 if done:
                     return
